@@ -30,7 +30,10 @@ user_question = st.text_input("Example: 2BHK flat in Wakad under 70 lakh")
 if user_question:
     with st.spinner("Thinking..."):
         response = ai(
-            f"You are a real estate assistant in Pune. Answer briefly:\n{user_question}",
+            f""You are a professional real estate consultant in Pune, India. "
+"Suggest areas, budget ranges, and next steps. Be clear and helpful.\n"
+f"User query: {user_question}"
+",
             max_length=80
         )
         st.success(response[0]["generated_text"])
@@ -59,3 +62,16 @@ if st.button("Submit"):
         """)
     else:
         st.error("Please enter Name and Phone Number")
+st.markdown("---")
+st.markdown("### 📥 Download Leads (Admin)")
+
+if os.path.exists("leads.csv"):
+    with open("leads.csv", "rb") as f:
+        st.download_button(
+            label="⬇️ Download leads.csv",
+            data=f,
+            file_name="leads.csv",
+            mime="text/csv"
+        )
+else:
+    st.info("No leads yet.")
