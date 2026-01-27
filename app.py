@@ -2,46 +2,23 @@ import streamlit as st
 import csv
 import os
 from datetime import datetime
-from transformers import pipeline
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
-    page_title="Pune Property AI",
-    page_icon="🏠",
+    page_title="AI Business Chatbot",
+    page_icon="🤖",
     layout="centered"
 )
 
-# ---------------- LOAD AI (FREE) ----------------
-@st.cache_resource
-def load_ai():
-    return pipeline("text-generation", model="gpt2")
-
-ai = load_ai()
-
 # ---------------- TITLE ----------------
-st.title("🏠 Pune Property AI Chatbot")
-st.caption("24/7 Real Estate Assistant + Lead Capture")
+st.title("🤖 AI Business Chatbot")
+st.caption("24/7 assistant + lead capture")
 
-# ---------------- CHAT SECTION ----------------
-st.markdown("### 🤖 Ask about Pune properties")
+# ---------------- CHAT ----------------
+question = st.text_input("Ask your question")
 
-user_question = st.text_input(
-    "Example: 2 BHK flat in Wakad under 70 lakh"
-)
-
-if user_question:
-    with st.spinner("Thinking..."):
-        response = ai(
-            "You are a professional real estate consultant in Pune, India. "
-            "Suggest good areas, budget ranges, and next steps.\n"
-            f"User query: {user_question}",
-            max_length=100
-        )
-        st.success(response[0]["generated_text"])
-
-# ---------------- LEAD FORM ----------------
 st.markdown("---")
-st.markdown("### 📞 Get a Call / WhatsApp")
+st.markdown("### 📩 Get a call back")
 
 name = st.text_input("Your Name")
 phone = st.text_input("Phone Number")
@@ -53,34 +30,40 @@ if st.button("Submit"):
 
         with open("leads.csv", "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
+
+            # HEADER (only once)
             if not file_exists:
-                writer.writerow(["Name", "Phone", "Email", "Date"])
+                writer.writerow([
+                    "Date",
+                    "Name",
+                    "Phone",
+                    "Email",
+                    "Question"
+                ])
+
             writer.writerow([
+                datetime.now().strftime("%d-%m-%Y %H:%M"),
                 name,
-                phone,
+                f"'{phone}",   # 👈 forces TEXT in Excel
                 email,
-                datetime.now().strftime("%Y-%m-%d %H:%M")
+                question
             ])
 
-        st.success("✅ Thank you! We will contact you shortly.")
-        st.markdown(f"""
-        👉 **Call:** [📞 {phone}](tel:{phone})  
-        👉 **WhatsApp:** [💬 Chat](https://wa.me/91{phone})
-        """)
+        st.success("✅ Lead saved successfully!")
     else:
-        st.error("Please enter Name and Phone Number")
+        st.error("Name and Phone are required")
 
-# ---------------- DOWNLOAD LEADS (ADMIN) ----------------
+# ---------------- DOWNLOAD ----------------
 st.markdown("---")
-st.markdown("### 📥 Download Leads (Admin)")
+st.markdown("### 📊 Download Leads")
 
 if os.path.exists("leads.csv"):
     with open("leads.csv", "rb") as f:
         st.download_button(
-            label="⬇️ Download leads.csv",
-            data=f,
+            "⬇️ Download leads.csv",
+            f,
             file_name="leads.csv",
             mime="text/csv"
         )
 else:
-    st.info("No leads yet. Submit a test lead first.")
+    st.info("No leads yet")
